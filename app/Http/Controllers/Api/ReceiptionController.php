@@ -58,10 +58,15 @@ class ReceiptionController extends Controller
     public function complete_reservation(CompleteReservationRequest $request)
     {
         $createdData = $this->receiptionService->complete_reservation($request->validated());
-        $returnData = ReservationResource::make($createdData);
-        return ApiResponseHelper::sendResponse(
-            new Result($returnData, "Done")
-        );
+        if ($createdData['success']) {
+            $returnData = ReservationResource::make($createdData['data']);
+
+            return ApiResponseHelper::sendResponse(
+                new Result($returnData, "Done")
+            );
+        } else {
+            return ApiResponseHelper::sendFailedResponse($createdData['message'], $createdData['code']);
+        }
     }
     public function cancle_reservation(CancleReservationRequest $request)
     {

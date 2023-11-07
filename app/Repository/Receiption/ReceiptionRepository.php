@@ -185,6 +185,25 @@ class ReceiptionRepository extends BaseRepositoryImplementation
     {
         DB::beginTransaction();
         try {
+            $reservation = Reservation::where('id', $data['reservation_id'])->first();
+            $existingReservation = Reservation::where('date',  $reservation->date)
+                ->where('status', '<>', ReservationStatus::CANCELED)
+                ->where('type', ReservationType::APPROVED)
+                ->where(function ($query) use ($reservation) {
+                    $query->where(function ($query) use ($reservation) {
+                        $query->where('start_time', '>=', $reservation->start_time)
+                            ->where('start_time', '<', $reservation->end_time);
+                    })
+                        ->orWhere(function ($query) use ($reservation) {
+                            $query->where('end_time', '>',  $reservation->start_time)
+                                ->where('end_time', '<=',  $reservation->end_time);
+                        });
+                })
+                ->first();
+            if ($existingReservation) {
+                return ['success' => false, 'message' => "Cannot complete this reservation because there is already another reservation at the same date and time.", 'code' => 200];
+            }
+
             $reservation = $this->updateById($data['reservation_id'], $data);
 
             if (Arr::has($data, 'attachment')) {
@@ -256,11 +275,8 @@ class ReceiptionRepository extends BaseRepositoryImplementation
             }
 
             DB::commit();
-            if ($reservation === null) {
-                return response()->json(['message' => "Reservation was not Updated"]);
-            }
 
-            return $reservation->load('expert', 'client');
+            return ['success' => true, 'data' =>  $reservation->load('expert', 'client'), 'code' => 200];
         } catch (\Exception $e) {
             DB::rollback();
             Log::error($e->getMessage());

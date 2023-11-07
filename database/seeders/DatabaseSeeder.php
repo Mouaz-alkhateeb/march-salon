@@ -44,13 +44,13 @@ class DatabaseSeeder extends Seeder
             'permission_to_delete' => HavePermission::FALSE,
             'permission_to_update' => HavePermission::FALSE
         ]);
-        $this->call(UsersTableSeeder::class);
-        $this->call(ClientsTableSeeder::class);
-        $this->call(ExpertsTableSeeder::class);
-        $this->call(EventsTableSeeder::class);
-        $this->call(ServicesTableSeeder::class);
-        $this->call(BridePackagesTableSeeder::class);
-        $this->call(TransfersTableSeeder::class);
-        $this->call(ReservationsTableSeeder::class);
+        // $this->call(UsersTableSeeder::class);
+        // $this->call(ClientsTableSeeder::class);
+        // $this->call(ExpertsTableSeeder::class);
+        // $this->call(EventsTableSeeder::class);
+        // $this->call(ServicesTableSeeder::class);
+        // $this->call(BridePackagesTableSeeder::class);
+        // $this->call(TransfersTableSeeder::class);
+        // $this->call(ReservationsTableSeeder::class);
     }
 }

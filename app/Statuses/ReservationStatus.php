@@ -11,6 +11,6 @@ class ReservationStatus
     public const PENDING = 4;
 
     public static array $statuses = [self::COMPLETED, self::CANCELED, self::DELAYED, self::PENDING];
-public static array $statuses2 = [self::DELAYED, self::PENDING];
+    public static array $statuses2 = [self::DELAYED, self::PENDING];
     public static array $statuses3 = [self::COMPLETED, self::PENDING, self::DELAYED];
 }
