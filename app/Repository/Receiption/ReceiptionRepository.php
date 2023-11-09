@@ -169,7 +169,7 @@ class ReceiptionRepository extends BaseRepositoryImplementation
             $notification = Notification::create([
                 'user_id' =>  Auth::user()->id,
                 'notification_type' => EventTypes::CreateReservation,
-                'title' => Auth::user()->name . ' ' . 'حجز جديد تمت إضافته في تاريخ' . ' ' . date('Y-m-d', strtotime($reservation->date)) . ' '   . ' من الساعة ' . $reservation->start_time . ' إلى الساعة ' . $reservation->end_time . ' '  . 'من قبل الموظفة',
+                'title' =>  $reservation->client->phone . ' ' . 'صاحبة الرقم ' . ' ' . $reservation->client->name . ' ' . 'للعميلة ' . ' ' . Auth::user()->name . ' ' . 'حجز جديد تمت إضافته في تاريخ' . ' ' . date('Y-m-d', strtotime($reservation->date)) . ' '   . ' من الساعة ' . $reservation->start_time . ' إلى الساعة ' . $reservation->end_time . ' '  . 'من قبل الموظفة',
                 'reservation_id' => $reservation->id,
                 'reservation_number' => $reservation->reservation_number
             ]);
@@ -205,6 +205,7 @@ class ReceiptionRepository extends BaseRepositoryImplementation
             }
 
             $reservation = $this->updateById($data['reservation_id'], $data);
+            $client_name = Client::where('id', $reservation->client_id)->first();
 
             if (Arr::has($data, 'attachment')) {
                 $file = Arr::get($data, 'attachment');
@@ -234,7 +235,7 @@ class ReceiptionRepository extends BaseRepositoryImplementation
                     $newnotification = Notification::create([
                         'user_id' =>  Auth::user()->id,
                         'notification_type' => EventTypes::CompleteReservation,
-                        'title' => ' ' . Auth::user()->name .  ' ' . 'الحجز رقم' . ' ' . $reservation->id . ' ' . 'تم تعديله بتاريخ ' . ' '  . ' ' . date('Y-m-d', strtotime($reservation->date)) . ' '  . 'من قبل الموظفة',
+                        'title' =>  $client_name->phone . ' ' . 'صاحبة الرقم ' . ' ' . $client_name->name . ' ' . 'للعميلة ' . ' ' . Auth::user()->name . ' ' . 'الحجز رقم' . ' ' . $reservation->id . ' ' . 'تم تعديله بتاريخ ' . ' ' . ' ' . date('Y-m-d', strtotime($reservation->date)) . ' ' . 'من قبل الموظفة',
                         'reservation_id' => $reservation->id,
                         'reservation_number' => $reservation->reservation_number
                     ]);
@@ -267,12 +268,13 @@ class ReceiptionRepository extends BaseRepositoryImplementation
                 $notification = Notification::create([
                     'user_id' =>  Auth::user()->id,
                     'notification_type' => EventTypes::CompleteReservation,
-                    'title' => ' ' . Auth::user()->name .  ' ' . 'الحجز رقم' . ' ' . $reservation->id . ' ' . 'تم تثبيته بتاريخ ' . ' '  . ' ' . date('Y-m-d', strtotime($reservation->date)) . ' '   . ' من الساعة ' . $reservation->start_time . ' إلى الساعة ' . $reservation->end_time . ' '  . 'من قبل الموظفة',
+                    'title' =>  $client_name->phone . ' ' . 'صاحبة الرقم ' . ' ' . $client_name->name . ' ' . 'للعميلة ' . ' ' . Auth::user()->name . ' ' . 'الحجز رقم' . ' ' . $reservation->id . ' ' . 'تم تثبيته بتاريخ ' . ' ' . ' ' . date('Y-m-d', strtotime($reservation->date)) . ' ' . ' من الساعة ' . $reservation->start_time . ' إلى الساعة ' . $reservation->end_time . ' ' . 'من قبل الموظفة',
                     'reservation_id' => $reservation->id,
                     'reservation_number' => $reservation->reservation_number
                 ]);
                 event(new NotificationEvent($notification));
             }
+
 
             DB::commit();
 
@@ -289,7 +291,7 @@ class ReceiptionRepository extends BaseRepositoryImplementation
         DB::beginTransaction();
         try {
             $reservation = $this->getById($data['reservation_id']);
-
+            $client_name = Client::where('id', $reservation->client_id)->first();
             $reservation->update([
                 'status' => ReservationStatus::CANCELED,
                 'reason_cancle' => $data['reason_cancle']
@@ -303,7 +305,7 @@ class ReceiptionRepository extends BaseRepositoryImplementation
             $notification = Notification::create([
                 'user_id' =>  Auth::user()->id,
                 'notification_type' => EventTypes::CancelReservation,
-                'title' => ' ' . Auth::user()->name .  ' ' . 'الحجز رقم' . ' ' . $reservation->id . ' ' . 'تم الغاءه ' . ' '   . 'من قبل الموظفة',
+                'title' =>  $client_name->phone . ' ' . 'صاحبة الرقم ' . ' ' . $client_name->name . ' ' . 'للعميلة ' . ' ' . Auth::user()->name . ' ' . 'الحجز رقم' . ' ' . $reservation->id . ' ' . 'تم الغاءه' . ' ' . ' ' . 'من قبل الموظفة',
                 'reservation_id' => $reservation->id,
                 'reservation_number' => $reservation->reservation_number
             ]);
@@ -362,7 +364,7 @@ class ReceiptionRepository extends BaseRepositoryImplementation
             $notification = Notification::create([
                 'user_id' =>  Auth::user()->id,
                 'notification_type' => EventTypes::DelayReservation,
-                'title' => $reservation->client->name . ' ' . 'للزبونة' . ' ' . Auth::user()->name .  ' ' . 'تم تأخير الحجز رقم' . ' ' . $reservation->id . ' ' . 'إلى تاريخ' . ' '  . ' ' . date('Y-m-d', strtotime($reservation->delay_date)) . ' '   . ' من الساعة ' . $reservation->start_time . ' إلى الساعة ' . $reservation->end_time . ' '  . 'من قبل الموظفة',
+                'title' =>  $reservation->client->phone . ' ' . 'صاحبة الرقم ' .  $reservation->client->name . ' ' . 'للعميلة' . ' ' . Auth::user()->name .  ' ' . 'تم تأخير الحجز رقم' . ' ' . $reservation->id . ' ' . 'إلى تاريخ' . ' '  . ' ' . date('Y-m-d', strtotime($reservation->delay_date)) . ' '   . ' من الساعة ' . $reservation->start_time . ' إلى الساعة ' . $reservation->end_time . ' '  . 'من قبل الموظفة',
                 'reservation_id' => $reservation->id,
                 'reservation_number' => $reservation->reservation_number
             ]);
